@@ -1,402 +1,820 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Research Paper Creator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper Creator - Basta Bago Na Siya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root{
-            --bg: #f5f7fa;
-            --panel: #ffffff;
-            --muted: #6b7280;
-            --primary-start: #667eea;
-            --primary-end: #764ba2;
-            --primary: #667eea;
-            --accent: #764ba2;
-            --shadow: 0 6px 18px rgba(16,24,40,0.08);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        * { box-sizing: border-box; }
-        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--bg); color:#1f2937; }
-        .container { max-width:1100px; margin:28px auto; padding:28px; }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
 
-        .page-header{ background: linear-gradient(135deg,var(--primary-start) 0%,var(--primary-end) 100%); color:white; padding:18px 22px; border-radius:10px; box-shadow:var(--shadow); display:flex; align-items:center; gap:16px; }
-        .page-header h1{ margin:0; font-size:20px; font-weight:600; }
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
+        .top-bar h1 {
+            font-size: 1.5em;
+        }
 
-        .toolbar { background:var(--panel); padding:8px; border-radius:8px; box-shadow:0 2px 8px rgba(15,23,42,0.06); display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:14px; }
-        .ribbon-group{ background:linear-gradient(180deg,rgba(15,23,42,0.02),transparent); border-radius:6px; padding:8px; display:flex; gap:8px; align-items:center; border:1px solid rgba(15,23,42,0.03); }
-        .ribbon-title{ font-size:11px; color:var(--muted); padding:0 6px; }
-        .toolbar button, .toolbar select, .toolbar input[type="color"] { background:transparent; border:1px solid rgba(15,23,42,0.04); padding:8px 10px; border-radius:6px; cursor:pointer; color:var(--muted); font-weight:600; }
-        .toolbar button:hover, .toolbar select:hover { background:rgba(102,126,234,0.06); color:var(--primary); }
-        .toolbar button.primary { background:linear-gradient(90deg,var(--primary-start),var(--primary-end)); color:white; border:none; }
-        .toolbar .spacer{ flex:1 }
-        .icon-btn{ width:40px; height:36px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; border-radius:6px; }
-        .label-btn{ padding:8px 12px; }
-        .sep{ width:1px; height:36px; background:linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.02)); margin:0 8px; border-radius:1px }
-        .ribbon-select{ min-width:140px; }
-        .ribbon-size{ width:64px }
+        .top-bar-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
+        .top-bar-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
 
-        #editorWrap { margin-top:14px; background:transparent; padding:0; border-radius:6px; }
-        #editor { background:var(--panel); min-height:640px; padding:36px; border-radius:8px; box-shadow:0 4px 24px rgba(16,24,40,0.06); outline:none; border:1px solid rgba(15,23,42,0.04); }
-        #editor:focus { box-shadow:0 8px 28px rgba(102,126,234,0.12); }
-        #editor h2{ margin-top:0; color:#0f172a; }
+        .top-bar-buttons button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
 
-        #stats{ color:var(--muted); font-size:13px }
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
 
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
 
-        /* find/replace modal */
-        #findReplace{ border-radius:8px; }
+        .sidebar-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            color: #667eea;
+        }
 
+        .form-group {
+            margin-bottom: 15px;
+        }
 
-        table { border-collapse:collapse; }
-        table td, table th { border:1px solid rgba(15,23,42,0.06); padding:8px }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 10px;
+            border-right: 1px solid #ddd;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar button,
+        .toolbar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toolbar button:hover,
+        .toolbar select:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .toolbar button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: white;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #editor {
+            min-height: 100%;
+            outline: none;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 0.9em;
+        }
+
+        .nav-links a:hover {
+            color: #764ba2;
+        }
+
+        .word-count {
+            padding: 10px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .toolbar {
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- ==================== TOP BAR ==================== -->
+    <!-- Header with title and quick action buttons -->
+    <div class="top-bar">
+        <h1>📄 Research Paper Creator</h1>
+        <div class="top-bar-buttons">
+            <button onclick="downloadPaper()" title="Download as Word">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button onclick="saveDraft()" title="Save Draft">
+                <i class="fas fa-save"></i> Save Draft
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
     <div class="container">
-        <div class="page-header">
-            <h1>Research Paper Creator</h1>
-        </div>
+        <!-- ==================== LEFT SIDEBAR ==================== -->
+        <!-- Paper metadata and document properties -->
+        <div class="sidebar">
+            <div class="success-message" id="successMessage">✓ Saved!</div>
+            <div class="error-message" id="errorMessage"></div>
 
+            <!-- Paper Title Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">📋 Paper Details</div>
+                
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input type="text" id="title" placeholder="Research paper title" required>
+                </div>
 
-        <div class="toolbar" role="toolbar" aria-label="Text formatting toolbar">
-            <div class="ribbon-group">
-                <div>
-                    <div class="ribbon-title">Font</div>
-                    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-                        <select id="fontFamily" class="ribbon-select" onchange="setFontName(this.value)" onmousedown="saveSelection(); event.preventDefault();">
-                            <option value="Segoe UI">Segoe UI</option>
-                            <option value="Arial">Arial</option>
-                            <option value="Times New Roman">Times New Roman</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Courier New">Courier New</option>
-                            <option value="Bookman Old Style">Bookman Old Style</option>
-                        </select>
-                        <select id="fontSize" class="ribbon-size" onchange="setFontSize(this.value)" onmousedown="saveSelection(); event.preventDefault();">
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12" selected>12</option>
-                            <option value="14">14</option>
-                            <option value="16">16</option>
-                            <option value="18">18</option>
-                            <option value="20">20</option>
-                            <option value="24">24</option>
-                        </select>
-                        <button type="button" class="icon-btn" onclick="exec('bold')" title="Bold" onmousedown="saveSelection(); event.preventDefault();"><b>B</b></button>
-                        <button type="button" class="icon-btn" onclick="exec('italic')" title="Italic" onmousedown="saveSelection(); event.preventDefault();"><i>I</i></button>
-                        <button type="button" class="icon-btn" onclick="exec('underline')" title="Underline" onmousedown="saveSelection(); event.preventDefault();"><u>U</u></button>
-                        <button type="button" class="icon-btn" onclick="exec('strikeThrough')" title="Strikethrough" onmousedown="saveSelection(); event.preventDefault();">S</button>
-                        <input type="color" id="foreColor" title="Text color" onchange="exec('foreColor', this.value)" onmousedown="saveSelection()">
-                        <input type="color" id="hiliteColor" title="Highlight color" onchange="exec('hiliteColor', this.value)" onmousedown="saveSelection()">
-                    </div>
+                <div class="form-group">
+                    <label for="authorName">Author Name *</label>
+                    <input type="text" id="authorName" placeholder="Your name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="authorEmail">Email *</label>
+                    <input type="email" id="authorEmail" placeholder="email@university.edu" required>
                 </div>
             </div>
 
+            <!-- Document Properties -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔬 Research Info</div>
+                
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="">Select category</option>
+                        <option value="science">Science</option>
+                        <option value="technology">Technology</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="mathematics">Mathematics</option>
+                        <option value="social-science">Social Science</option>
+                        <option value="humanities">Humanities</option>
+                    </select>
+                </div>
 
-            <div class="ribbon-group">
-                <div>
-                    <div class="ribbon-title">Paragraph</div>
-                    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-                        <button type="button" class="icon-btn" onclick="exec('insertUnorderedList')" title="Bulleted List" onmousedown="saveSelection(); event.preventDefault();">•</button>
-                        <button type="button" class="icon-btn" onclick="exec('insertOrderedList')" title="Numbered List" onmousedown="saveSelection(); event.preventDefault();">1</button>
-                        <div class="sep" aria-hidden="true"></div>
-                        <button type="button" class="icon-btn" onclick="exec('justifyLeft')" title="Align left" onmousedown="saveSelection(); event.preventDefault();">⟵</button>
-                        <button type="button" class="icon-btn" onclick="exec('justifyCenter')" title="Align center" onmousedown="saveSelection(); event.preventDefault();">⟷</button>
-                        <button type="button" class="icon-btn" onclick="exec('justifyRight')" title="Align right" onmousedown="saveSelection(); event.preventDefault();">⟶</button>
-                        <div class="sep" aria-hidden="true"></div>
-                        <button type="button" class="icon-btn" onclick="exec('indent')" title="Indent" onmousedown="saveSelection(); event.preventDefault();">→</button>
-                        <button type="button" class="icon-btn" onclick="exec('outdent')" title="Outdent" onmousedown="saveSelection(); event.preventDefault();">←</button>
-                    </div>
+                <div class="form-group">
+                    <label for="submissionDate">Submission Date *</label>
+                    <input type="date" id="submissionDate" required>
                 </div>
             </div>
 
-
-            <div class="ribbon-group">
-                <div>
-                    <div class="ribbon-title">Insert</div>
-                    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-                        <button type="button" class="icon-btn" onclick="triggerImage()" title="Insert image" onmousedown="saveSelection(); event.preventDefault();">🖼</button>
-                        <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(event)">
-                        <button type="button" class="label-btn" onclick="insertTable()" title="Insert table" onmousedown="saveSelection(); event.preventDefault();">Table</button>
-                    </div>
+            <!-- Abstract Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">📝 Abstract</div>
+                <div class="form-group">
+                    <textarea id="abstract" placeholder="Write your abstract (min 50 chars)"></textarea>
                 </div>
             </div>
 
-
-            <div class="ribbon-group">
-                <div>
-                    <div class="ribbon-title">Editing</div>
-                        <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-                        <button type="button" class="label-btn" onclick="showFindReplace()" title="Find & Replace" onmousedown="saveSelection(); event.preventDefault();">Find</button>
-                        <button type="button" class="icon-btn" onclick="undo()" title="Undo" onmousedown="saveSelection(); event.preventDefault();">↺</button>
-                        <button type="button" class="icon-btn" onclick="redo()" title="Redo" onmousedown="saveSelection(); event.preventDefault();">↻</button>
-                    </div>
+            <!-- Keywords Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">🏷️ Keywords</div>
+                <div class="form-group">
+                    <input type="text" id="keywords" placeholder="keyword1, keyword2, keyword3">
                 </div>
             </div>
 
-
-            <div class="spacer"></div>
-
-
-            <div style="display:flex;align-items:center;gap:10px">
-                <span id="stats">Words: 0 • Chars: 0</span>
-                <div class="sep" aria-hidden="true"></div>
-                <button type="button" class="label-btn" onclick="newDoc()" title="New document" onmousedown="saveSelection(); event.preventDefault();">New</button>
-                <button type="button" class="label-btn" onclick="openDoc()" title="Open HTML file" onmousedown="saveSelection(); event.preventDefault();">Open</button>
-                <input type="file" id="openInput" accept="text/html,.html,.htm,.txt" style="display:none" onchange="openFile(event)">
-                <button type="button" class="label-btn primary" onclick="downloadDoc()" title="Download as Word document" onmousedown="saveSelection(); event.preventDefault();">Save</button>
-                <button type="button" class="label-btn" onclick="downloadHTML()" title="Download HTML" onmousedown="saveSelection(); event.preventDefault();">Export HTML</button>
-                <button type="button" class="label-btn" onclick="printDoc()" title="Print document" onmousedown="saveSelection(); event.preventDefault();">Print</button>
+            <!-- Submit Button -->
+            <div class="sidebar-section">
+                <button onclick="submitPaper()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 1em;">
+                    <i class="fas fa-paper-plane"></i> Done
+                </button>
             </div>
         </div>
 
+        <!-- ==================== EDITOR AREA ==================== -->
+        <!-- Word processor-like editor for document creation -->
+        <div class="editor-area">
+            <!-- ==================== FORMATTING TOOLBAR ==================== -->
+            <!-- Rich text formatting controls similar to Microsoft Word -->
+            <div class="toolbar">
+                <!-- Font Selection -->
+                <div class="toolbar-group">
+                    <select id="fontFamily" onchange="formatText('fontName', this.value)">
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                    </select>
 
-        <div id="editorWrap">
-            <div id="editor" contenteditable="true" spellcheck="true">
-                <h2>Title</h2>
-                <p>Start writing your research paper here...</p>
+                    <!-- Font Size Selection -->
+                    <select id="fontSize" onchange="formatText('fontSize', this.value + 'px')">
+                        <option value="10">10px</option>
+                        <option value="12">12px</option>
+                        <option value="14" selected>14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                        <option value="24">24px</option>
+                    </select>
+                </div>
+
+                <!-- Text Style Buttons -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('bold')" title="Bold (Ctrl+B)">
+                        <i class="fas fa-bold"></i>
+                    </button>
+                    <button onclick="formatText('italic')" title="Italic (Ctrl+I)">
+                        <i class="fas fa-italic"></i>
+                    </button>
+                    <button onclick="formatText('underline')" title="Underline (Ctrl+U)">
+                        <i class="fas fa-underline"></i>
+                    </button>
+                    <button onclick="formatText('strikethrough')" title="Strikethrough">
+                        <i class="fas fa-strikethrough"></i>
+                    </button>
+                </div>
+
+                <!-- Text Color and Highlighting -->
+                <div class="toolbar-group">
+                    <input type="color" id="textColor" class="color-picker" value="#000000" 
+                           onchange="formatText('foreColor', this.value)" title="Text Color">
+                    <input type="color" id="highlightColor" class="color-picker" value="#FFFF00"
+                           onchange="formatText('backColor', this.value)" title="Highlight Color">
+                </div>
+
+                <!-- Text Alignment -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('justifyLeft')" title="Align Left">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                    <button onclick="formatText('justifyCenter')" title="Align Center">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                    <button onclick="formatText('justifyRight')" title="Align Right">
+                        <i class="fas fa-align-right"></i>
+                    </button>
+                    <button onclick="formatText('justifyFull')" title="Justify">
+                        <i class="fas fa-align-justify"></i>
+                    </button>
+                </div>
+
+                <!-- List Formatting -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('insertUnorderedList')" title="Bullet List">
+                        <i class="fas fa-list-ul"></i>
+                    </button>
+                    <button onclick="formatText('insertOrderedList')" title="Numbered List">
+                        <i class="fas fa-list-ol"></i>
+                    </button>
+                </div>
+
+                <!-- Additional Formatting -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('indent')" title="Increase Indent">
+                        <i class="fas fa-indent"></i>
+                    </button>
+                    <button onclick="formatText('outdent')" title="Decrease Indent">
+                        <i class="fas fa-outdent"></i>
+                    </button>
+                </div>
+
+                <!-- Special Functions -->
+                <div class="toolbar-group">
+                    <button onclick="insertLink()" title="Insert Link">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    <button onclick="insertImage()" title="Insert Image">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <button onclick="clearFormatting()" title="Clear Formatting">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+
+                <!-- Undo/Redo -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('undo')" title="Undo">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button onclick="formatText('redo')" title="Redo">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================== EDITOR CONTENT AREA ==================== -->
+            <!-- Main text editing area - editable like Word document -->
+            <div class="editor-content">
+                <div id="editor" contenteditable="true" spellcheck="true">
+                    <h1>Research Paper Title</h1>
+                    <p>Start typing your research paper here...</p>
+                </div>
+            </div>
+
+            <!-- ==================== WORD COUNT FOOTER ==================== -->
+            <!-- Shows document statistics -->
+            <div class="word-count">
+                <span id="wordCount">Words: 0</span> | 
+                <span id="charCount">Characters: 0</span> |
+                <span id="readTime">Read time: ~0 min</span>
             </div>
         </div>
     </div>
 
-
-    <div id="findReplace" style="display:none; position:fixed; right:20px; top:100px; width:300px; background:#fff; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,0.15); border-radius:6px; z-index:9999">
-        <div style="display:flex;gap:8px;margin-bottom:8px"><input id="findInput" placeholder="Find" style="flex:1;padding:6px"><button onclick="findNext()">Next</button></div>
-        <div style="display:flex;gap:8px;margin-bottom:8px"><input id="replaceInput" placeholder="Replace" style="flex:1;padding:6px"><button onclick="replaceAll()">Replace All</button></div>
-        <div style="text-align:right"><button onclick="hideFindReplace()">Close</button></div>
+    <!-- ==================== NAVIGATION ==================== -->
+    <div class="nav-links">
+        <a href="Student_dashboard.html">← Dashboard</a>
+        <a href="research-group.html">Research Groups</a>
+        <a href="login.html">Logout</a>
     </div>
 
-
+    <!-- ==================== JAVASCRIPT FUNCTIONALITY ==================== -->
+    <!-- Rich text editor and form submission logic -->
     <script>
-        function exec(command, value=null){
-            restoreSelection();
-            try{ document.execCommand(command, false, value); }catch(e){}
+        /**
+         * TEXT FORMATTING FUNCTION
+         * ========================
+         * Applies various formatting styles to selected text in the editor
+         * Supports bold, italic, font changes, colors, alignment, and more
+         * 
+         * @param {string} command - The formatting command to execute
+         * @param {string} value - Optional value for the command (colors, font name, etc)
+         */
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
             document.getElementById('editor').focus();
-            scheduleSave();
-            updateStats();
         }
 
-
-        function setFontName(name){
-            restoreSelection();
-            const sel = window.getSelection();
-            if(sel.rangeCount && sel.getRangeAt(0).collapsed){
-                applyStyleAtCaret('font-family:'+name+';');
-            }else{
-                exec('fontName', name);
+        /**
+         * INSERT LINK FUNCTION
+         * ====================
+         * Prompts user for URL and inserts a hyperlink
+         */
+        function insertLink() {
+            const url = prompt('Enter URL:');
+            if (url) {
+                document.execCommand('createLink', false, url);
             }
+            document.getElementById('editor').focus();
         }
 
-
-        function setFontSize(size){
-            // wrap selection with span style to set exact px size
-            restoreSelection();
-            const sel = window.getSelection();
-            if(sel.rangeCount && sel.getRangeAt(0).collapsed){
-                applyStyleAtCaret('font-size:'+parseInt(size,10)+'px');
-            }else{
-                wrapSelectionWithSpan('font-size:'+parseInt(size,10)+'px');
+        /**
+         * INSERT IMAGE FUNCTION
+         * =====================
+         * Prompts user for image URL and inserts it into document
+         */
+        function insertImage() {
+            const imageUrl = prompt('Enter image URL:');
+            if (imageUrl) {
+                document.execCommand('insertImage', false, imageUrl);
             }
-            scheduleSave(); updateStats();
+            document.getElementById('editor').focus();
         }
 
-
-        function wrapSelectionWithSpan(style){
-            const sel = window.getSelection(); if(!sel.rangeCount) return;
-            const range = sel.getRangeAt(0);
-            if(range.collapsed) return;
-            const fragment = range.extractContents();
-            const span = document.createElement('span');
-            span.setAttribute('style', style);
-            span.appendChild(fragment);
-            range.insertNode(span);
-            // restore selection inside the newly inserted span
-            sel.removeAllRanges();
-            const newRange = document.createRange();
-            newRange.selectNodeContents(span);
-            sel.addRange(newRange);
+        /**
+         * CLEAR FORMATTING FUNCTION
+         * ==========================
+         * Removes all formatting from selected text
+         */
+        function clearFormatting() {
+            document.execCommand('removeFormat', false, null);
+            document.getElementById('editor').focus();
         }
 
-
-        function applyStyleAtCaret(style){
-            const sel = window.getSelection(); if(!sel.rangeCount) return;
-            const range = sel.getRangeAt(0);
-            // create a span with zero-width space so typing continues inside it
-            const span = document.createElement('span');
-            span.setAttribute('style', style);
-            const zw = document.createTextNode('\u200B');
-            span.appendChild(zw);
-            range.insertNode(span);
-            // place caret after the zero-width char inside the span
-            range.setStart(span.firstChild, 1);
-            range.setEnd(span.firstChild, 1);
-            sel.removeAllRanges();
-            sel.addRange(range);
+        /**
+         * UPDATE WORD COUNT
+         * =================
+         * Calculates and displays word and character count
+         * Also estimates reading time
+         */
+        function updateWordCount() {
+            const editor = document.getElementById('editor');
+            const text = editor.innerText || '';
+            
+            // Count words
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            
+            // Count characters
+            const characters = text.length;
+            
+            // Estimate reading time (average 200 words per minute)
+            const readTime = Math.ceil(words / 200) || 0;
+            
+            document.getElementById('wordCount').textContent = `Words: ${words}`;
+            document.getElementById('charCount').textContent = `Characters: ${characters}`;
+            document.getElementById('readTime').textContent = `Read time: ~${readTime} min`;
         }
-        function undo(){ document.execCommand('undo'); }
-        function redo(){ document.execCommand('redo'); }
-        function triggerImage(){ document.getElementById('imgInput').click(); }
-        function insertImage(e){
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt){
-                restoreSelection();
-                exec('insertImage', evt.target.result);
+
+        /**
+         * SAVE DRAFT FUNCTION
+         * ===================
+         * Saves the paper content and metadata to localStorage
+         * Shows confirmation message to user
+         */
+        function saveDraft() {
+            const draftData = {
+                title: document.getElementById('title').value,
+                authorName: document.getElementById('authorName').value,
+                authorEmail: document.getElementById('authorEmail').value,
+                category: document.getElementById('category').value,
+                submissionDate: document.getElementById('submissionDate').value,
+                abstract: document.getElementById('abstract').value,
+                keywords: document.getElementById('keywords').value,
+                content: document.getElementById('editor').innerHTML,
+                savedAt: new Date().toISOString()
             };
-            reader.readAsDataURL(file);
-            e.target.value = '';
+
+            localStorage.setItem('paperDraft', JSON.stringify(draftData));
+            
+            // Show success message
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
         }
 
+        /**
+         * DOWNLOAD PAPER FUNCTION
+         * =======================
+         * Exports the paper as an HTML file for download
+         * Can be opened in any browser or converted to other formats
+         */
+        function downloadPaper() {
+            // Validate required fields
+            const title = document.getElementById('title').value || 'Research Paper';
+            const authorName = document.getElementById('authorName').value || 'Unknown';
+            
+            const content = document.getElementById('editor').innerHTML;
+            
+            // Create HTML document
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; }
+                        h1 { text-align: center; }
+                        .metadata { background: #f0f0f0; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                        .metadata p { margin: 5px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="metadata">
+                        <h1>${title}</h1>
+                        <p><strong>Author:</strong> ${authorName}</p>
+                        <p><strong>Category:</strong> ${document.getElementById('category').value}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div class="content">
+                        ${content}
+                    </div>
+                </body>
+                </html>
+            `;
 
-        function newDoc(){
-            if(!confirm('Create new document? Unsaved changes will be lost.')) return;
-            document.getElementById('editor').innerHTML = '<h2>Title</h2><p></p>';
-        }
-
-
-        function openDoc(){ document.getElementById('openInput').click(); }
-        function openFile(e){
-            const f = e.target.files[0]; if(!f) return;
-            const reader = new FileReader();
-            reader.onload = function(evt){
-                document.getElementById('editor').innerHTML = evt.target.result;
-                updateStats();
-            };
-            reader.readAsText(f);
-            e.target.value = '';
-        }
-
-
-        function downloadDoc(){
-            const header = '<!doctype html><html><head><meta charset="utf-8"></head><body>';
-            const footer = '</body></html>';
-            const content = header + document.getElementById('editor').innerHTML + footer;
-            const blob = new Blob([content], { type: 'application/msword' });
+            // Create download link
+            const blob = new Blob([html], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'research-paper.doc';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${title.replace(/\s+/g, '_')}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
+        /**
+         * SUBMIT PAPER FUNCTION
+         * =====================
+         * Validates all required fields and submits the paper
+         * Shows appropriate success or error messages
+         */
+        function submitPaper() {
+            // Collect all field values
+            const title = document.getElementById('title').value.trim();
+            const authorName = document.getElementById('authorName').value.trim();
+            const authorEmail = document.getElementById('authorEmail').value.trim();
+            const category = document.getElementById('category').value;
+            const submissionDate = document.getElementById('submissionDate').value;
+            const abstract = document.getElementById('abstract').value.trim();
+            const keywords = document.getElementById('keywords').value.trim();
+            const content = document.getElementById('editor').innerHTML;
 
-        function printDoc(){
-            const w = window.open('', '_blank');
-            w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Print</title></head><body>');
-            w.document.write(document.getElementById('editor').innerHTML);
-            w.document.write('</body></html>');
-            w.document.close();
-            w.focus();
-            setTimeout(()=>{ w.print(); w.close(); }, 300);
-        }
+            // Validation error array
+            const errors = [];
 
-
-        function downloadHTML(){
-            const content = '<!doctype html><html><head><meta charset="utf-8"></head><body>' + document.getElementById('editor').innerHTML + '</body></html>';
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'research-paper.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        }
-
-
-        // Autosave to localStorage
-        const SAVE_KEY = 'research-paper-draft';
-        let saveTimer = null;
-        function scheduleSave(){
-            if(saveTimer) clearTimeout(saveTimer);
-            saveTimer = setTimeout(()=>{ saveDraft(); }, 2000);
-        }
-        function saveDraft(){
-            const data = { html: document.getElementById('editor').innerHTML, ts: Date.now() };
-            try{ localStorage.setItem(SAVE_KEY, JSON.stringify(data)); document.getElementById('stats').dataset.saved = data.ts; }catch(e){}
-        }
-        function restoreDraft(){
-            try{
-                const raw = localStorage.getItem(SAVE_KEY); if(!raw) return false;
-                const data = JSON.parse(raw);
-                if(data && data.html){ document.getElementById('editor').innerHTML = data.html; updateStats(); return true; }
-            }catch(e){}
-            return false;
-        }
-
-
-        function clearDraft(){ localStorage.removeItem(SAVE_KEY); }
-
-
-        function updateStats(){
-            const text = document.getElementById('editor').innerText || '';
-            const words = text.trim().length ? text.trim().split(/\s+/).length : 0;
-            const chars = text.replace(/\s/g,'').length;
-            document.getElementById('stats').textContent = `Words: ${words} • Chars: ${chars}`;
-        }
-
-
-        // Find / Replace (basic)
-        function showFindReplace(){ document.getElementById('findReplace').style.display = 'block'; document.getElementById('findInput').focus(); }
-        function hideFindReplace(){ document.getElementById('findReplace').style.display = 'none'; }
-        function findNext(){ const q = document.getElementById('findInput').value; if(!q) return; window.find(q, false, false, true); }
-        function replaceAll(){ const q = document.getElementById('findInput').value; const r = document.getElementById('replaceInput').value; if(!q) return; if(!confirm('Replace all occurrences of "'+q+'" with "'+r+'"?')) return; const el = document.getElementById('editor'); el.innerHTML = el.innerHTML.split(q).join(r); updateStats(); scheduleSave(); }
-
-
-        function insertTable(){ const rows = parseInt(prompt('Rows', '2')); const cols = parseInt(prompt('Cols', '2')); if(isNaN(rows) || isNaN(cols) || rows<1 || cols<1) return; let html = '<table border="1" style="border-collapse:collapse;width:100%">'; for(let r=0;r<rows;r++){ html += '<tr>'; for(let c=0;c<cols;c++){ html += '<td style="padding:6px">&nbsp;</td>'; } html += '</tr>'; } html += '</table><p></p>'; exec('insertHTML', html); }
-
-
-        // Save / restore selection so toolbar clicks don't lose selection
-        let _savedRange = null;
-        function saveSelection(){ const sel = window.getSelection(); if(sel.rangeCount) try{ _savedRange = sel.getRangeAt(0).cloneRange(); }catch(e){ _savedRange = null; } }
-        function restoreSelection(){ const editorEl = document.getElementById('editor'); try{ editorEl.focus(); }catch(e){}
-            const sel = window.getSelection(); sel.removeAllRanges(); if(_savedRange){ try{ sel.addRange(_savedRange); }catch(e){ /* if original range invalid, place caret at end of editor */ const r = document.createRange(); r.selectNodeContents(editorEl); r.collapse(false); sel.addRange(r); } } else { const r = document.createRange(); r.selectNodeContents(editorEl); r.collapse(false); sel.addRange(r); } }
-
-
-        // keep selection when interacting with toolbar
-        document.querySelector('.toolbar').addEventListener('mousedown', function(e){
-            const btn = e.target.closest('button');
-            const selEl = e.target.closest('select');
-            const color = e.target.closest('input[type="color"]');
-            if(btn || selEl || color){ saveSelection(); }
-        });
-
-
-        // keyboard shortcuts: Ctrl+S to download
-        document.addEventListener('keydown', function(e){
-            if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
-                e.preventDefault(); downloadDoc();
+            // Validate title
+            if (!title) {
+                errors.push('Paper title is required');
+            } else if (title.length < 5) {
+                errors.push('Paper title must be at least 5 characters');
             }
-            if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b'){
-                // let browser handle Ctrl+B for bold
+
+            // Validate author name
+            if (!authorName) {
+                errors.push('Author name is required');
             }
-        });
 
-
-        // update stats on input and autosave
-        const editor = document.getElementById('editor');
-        ['input','keyup','paste','cut'].forEach(ev => editor.addEventListener(ev, ()=>{ updateStats(); scheduleSave(); }));
-
-
-        // restore draft on load
-        window.addEventListener('load', ()=>{
-            updateStats();
-            const raw = localStorage.getItem(SAVE_KEY);
-            if(raw){ if(confirm('A saved draft was found. Restore it?')){ restoreDraft(); } }
-        });
-
-
-        // keyboard shortcuts: Ctrl+S to download
-        document.addEventListener('keydown', function(e){
-            if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
-                e.preventDefault(); downloadDoc();
+            // Validate email
+            if (!authorEmail) {
+                errors.push('Email is required');
+            } else if (!isValidEmail(authorEmail)) {
+                errors.push('Invalid email address');
             }
+
+            // Validate category
+            if (!category) {
+                errors.push('Research category is required');
+            }
+
+            // Validate date
+            if (!submissionDate) {
+                errors.push('Submission date is required');
+            }
+
+            // Validate abstract
+            if (!abstract) {
+                errors.push('Abstract is required');
+            } else if (abstract.length < 50) {
+                errors.push('Abstract must be at least 50 characters');
+            }
+
+            // Validate keywords
+            if (!keywords) {
+                errors.push('Keywords are required');
+            }
+
+            // Validate content
+            if (!content || content.length < 100) {
+                errors.push('Paper content must have at least 100 characters');
+            }
+
+            // Show errors or submit
+            if (errors.length > 0) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.innerHTML = '✗ ' + errors.join('<br>');
+                errorDiv.style.display = 'block';
+            } else {
+                // Prepare submission data
+                const paperData = {
+                    title, authorName, authorEmail, category, submissionDate,
+                    abstract, keywords, content, submittedAt: new Date().toISOString()
+                };
+
+                // Save to localStorage
+                const submissions = JSON.parse(localStorage.getItem('researchPapers') || '[]');
+                submissions.push(paperData);
+                localStorage.setItem('researchPapers', JSON.stringify(submissions));
+
+                // Show success and redirect
+                const successMsg = document.getElementById('successMessage');
+                successMsg.innerHTML = '✓ Paper submitted successfully!';
+                successMsg.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = 'Student_dashboard.html';
+                }, 2000);
+            }
+        }
+
+        /**
+         * EMAIL VALIDATION
+         * ================
+         * Checks if email follows valid format
+         * 
+         * @param {string} email - Email to validate
+         * @returns {boolean} - True if valid
+         */
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        /**
+         * LOAD DRAFT FUNCTION
+         * ===================
+         * Restores previously saved draft from localStorage
+         */
+        function loadDraft() {
+            const saved = localStorage.getItem('paperDraft');
+            if (saved) {
+                const draft = JSON.parse(saved);
+                document.getElementById('title').value = draft.title || '';
+                document.getElementById('authorName').value = draft.authorName || '';
+                document.getElementById('authorEmail').value = draft.authorEmail || '';
+                document.getElementById('category').value = draft.category || '';
+                document.getElementById('submissionDate').value = draft.submissionDate || '';
+                document.getElementById('abstract').value = draft.abstract || '';
+                document.getElementById('keywords').value = draft.keywords || '';
+                document.getElementById('editor').innerHTML = draft.content || '';
+            }
+        }
+
+        /**
+         * PAGE INITIALIZATION
+         * ===================
+         * Sets up event listeners and loads saved drafts on page load
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load draft if exists
+            loadDraft();
+
+            // Set minimum date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('submissionDate').min = today;
+
+            // Update word count on content change
+            const editor = document.getElementById('editor');
+            editor.addEventListener('input', updateWordCount);
+            editor.addEventListener('keyup', updateWordCount);
+
+            // Initial word count
+            updateWordCount();
+
+            // Update metadata fields on change
+            document.getElementById('title').addEventListener('input', () => {
+                document.getElementById('editor').focus();
+            });
         });
+
+        // Auto-save draft every 30 seconds
+        setInterval(saveDraft, 30000);
     </script>
 </body>
 </html>
-
-
-
-
