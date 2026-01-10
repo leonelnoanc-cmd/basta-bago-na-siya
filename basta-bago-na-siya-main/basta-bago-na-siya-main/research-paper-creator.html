@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper Creator - Basta Bago Na Siya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar h1 {
+            font-size: 1.5em;
+        }
+
+        .top-bar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-bar-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .top-bar-buttons button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 10px;
+            border-right: 1px solid #ddd;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar button,
+        .toolbar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toolbar button:hover,
+        .toolbar select:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .toolbar button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: white;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #editor {
+            min-height: 100%;
+            outline: none;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 0.9em;
+        }
+
+        .nav-links a:hover {
+            color: #764ba2;
+        }
+
+        .word-count {
+            padding: 10px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* floating action buttons */
+        .fixed-action-btn { position: fixed; right: 20px; bottom: 20px; z-index: 60; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(102,126,234,0.25); }
+        .fixed-action-btn.secondary { background: #27ae60; }
+        .fixed-action-btn:active { transform: translateY(1px); }
+        @media (max-width: 600px) { .fixed-action-btn { right: 12px; bottom: 12px; padding: 10px 14px; } }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .toolbar {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== TOP BAR ==================== -->
+    <!-- Header with title and quick action buttons -->
+    <div class="top-bar">
+        <h1>📄 Research Paper Creator</h1>
+        <div class="top-bar-buttons">
+            <button onclick="downloadPaper()" title="Download as Word">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button onclick="saveDraft()" title="Save Draft">
+                <i class="fas fa-save"></i> Save Draft
+            </button>
+            <button onclick="submitForm()" title="Submit Paper">
+                <i class="fas fa-paper-plane"></i> Submit
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <div class="container">
+        <!-- LEFT SIDEBAR REMOVED: Paper details were moved/removed per request -->
+        <!-- Sidebar removed; editor area will occupy full width -->
+
+        <!-- ==================== EDITOR AREA ==================== -->
+        <!-- Word processor-like editor for document creation -->
+        <div class="editor-area">
+            <!-- Messages (moved from sidebar) -->
+            <div class="success-message" id="successMessage">✓ Saved!</div>
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- ==================== FORMATTING TOOLBAR ==================== -->
+            <!-- Rich text formatting controls similar to Microsoft Word -->
+            <div class="toolbar">
+                <!-- Font Selection -->
+                <div class="toolbar-group">
+                    <select id="fontFamily" onchange="formatText('fontName', this.value)">
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                    </select>
+
+                    <!-- Font Size Selection -->
+                    <select id="fontSize" onchange="formatText('fontSize', this.value + 'px')">
+                        <option value="10">10px</option>
+                        <option value="12">12px</option>
+                        <option value="14" selected>14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                        <option value="24">24px</option>
+                    </select>
+                </div>
+
+                <!-- Text Style Buttons -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('bold')" title="Bold (Ctrl+B)">
+                        <i class="fas fa-bold"></i>
+                    </button>
+                    <button onclick="formatText('italic')" title="Italic (Ctrl+I)">
+                        <i class="fas fa-italic"></i>
+                    </button>
+                    <button onclick="formatText('underline')" title="Underline (Ctrl+U)">
+                        <i class="fas fa-underline"></i>
+                    </button>
+                    <button onclick="formatText('strikethrough')" title="Strikethrough">
+                        <i class="fas fa-strikethrough"></i>
+                    </button>
+                </div>
+
+                <!-- Text Color and Highlighting -->
+                <div class="toolbar-group">
+                    <input type="color" id="textColor" class="color-picker" value="#000000" 
+                           onchange="formatText('foreColor', this.value)" title="Text Color">
+                    <input type="color" id="highlightColor" class="color-picker" value="#FFFF00"
+                           onchange="formatText('backColor', this.value)" title="Highlight Color">
+                </div>
+
+                <!-- Text Alignment -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('justifyLeft')" title="Align Left">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                    <button onclick="formatText('justifyCenter')" title="Align Center">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                    <button onclick="formatText('justifyRight')" title="Align Right">
+                        <i class="fas fa-align-right"></i>
+                    </button>
+                    <button onclick="formatText('justifyFull')" title="Justify">
+                        <i class="fas fa-align-justify"></i>
+                    </button>
+                </div>
+
+                <!-- List Formatting -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('insertUnorderedList')" title="Bullet List">
+                        <i class="fas fa-list-ul"></i>
+                    </button>
+                    <button onclick="formatText('insertOrderedList')" title="Numbered List">
+                        <i class="fas fa-list-ol"></i>
+                    </button>
+                </div>
+
+                <!-- Additional Formatting -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('indent')" title="Increase Indent">
+                        <i class="fas fa-indent"></i>
+                    </button>
+                    <button onclick="formatText('outdent')" title="Decrease Indent">
+                        <i class="fas fa-outdent"></i>
+                    </button>
+                </div>
+
+                <!-- Special Functions -->
+                <div class="toolbar-group">
+                    <button onclick="insertLink()" title="Insert Link">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    <button onclick="insertImage()" title="Insert Image">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <button onclick="clearFormatting()" title="Clear Formatting">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+
+                <!-- Undo/Redo -->
+                <div class="toolbar-group">
+                    <button onclick="formatText('undo')" title="Undo">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button onclick="formatText('redo')" title="Redo">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================== EDITOR CONTENT AREA ==================== -->
+            <!-- Main text editing area - editable like Word document -->
+            <div class="editor-content">
+                <div id="editor" contenteditable="true" spellcheck="true">
+                    <h1>Research Paper Title</h1>
+                    <p>Start typing your research paper here...</p>
+                </div>
+            </div>
+
+            <!-- ==================== WORD COUNT FOOTER ==================== -->
+            <!-- Shows document statistics -->
+            <div class="word-count">
+                <span id="wordCount">Words: 0</span> | 
+                <span id="charCount">Characters: 0</span> |
+                <span id="readTime">Read time: ~0 min</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DONE BUTTON (saves and moves to chapters flow) -->
+    <button id="doneBtn" class="fixed-action-btn" onclick="doneAndGoToChapters()" title="Done and choose chapters">
+        ✅ Done
+    </button>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <div class="nav-links">
+        <a href="Student_dashboard.html">← Dashboard</a>
+        <a href="research-group.html">Research Groups</a>
+        <a href="login.html">Logout</a>
+    </div>
+
+    <!-- ==================== JAVASCRIPT FUNCTIONALITY ==================== -->
+    <!-- All form validation and submission logic -->
+    <script>
+        /**
+         * FORM SUBMISSION HANDLER
+         * ========================
+         * Validates and processes the research paper form submission
+         * 
+         * Validations:
+         * - All required fields are filled
+         * - Abstract has minimum 50 characters
+         * - File is selected and is PDF format
+         * - Email is valid format
+         * 
+         * @param {Event} event - The form submission event
+         */
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            // Clear previous messages (if present)
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+            if (successEl) successEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'none';
+
+            // Safe getters for possibly-missing sidebar inputs
+            const getVal = id => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+            const title = getVal('title');
+            const authorName = getVal('authorName');
+            const authorEmail = getVal('authorEmail');
+            const category = getVal('category');
+            const submissionDate = getVal('submissionDate');
+            const abstract = getVal('abstract');
+            const keywords = getVal('keywords');
+            const paperFileEl = document.getElementById('paperFile');
+            const paperFile = (paperFileEl && paperFileEl.files && paperFileEl.files[0]) ? paperFileEl.files[0] : null;
+
+            // Validation error array
+            const errors = [];
+
+            // Validate title
+            if (!title) {
+                errors.push('Paper title is required');
+            } else if (title.length < 5) {
+                errors.push('Paper title must be at least 5 characters');
+            }
+
+            // Validate author name
+            if (!authorName) {
+                errors.push('Author name is required');
+            } else if (authorName.length < 3) {
+                errors.push('Author name must be at least 3 characters');
+            }
+
+            // Validate author email
+            if (!authorEmail) {
+                errors.push('Author email is required');
+            } else if (!isValidEmail(authorEmail)) {
+                errors.push('Please enter a valid email address');
+            }
+
+            // Validate category
+            if (!category) {
+                errors.push('Research category is required');
+            }
+
+            // Validate submission date
+            if (!submissionDate) {
+                errors.push('Submission date is required');
+            } else if (new Date(submissionDate) < new Date()) {
+                errors.push('Submission date cannot be in the past');
+            }
+
+            // Validate abstract
+            if (!abstract) {
+                errors.push('Abstract is required');
+            } else if (abstract.length < 50) {
+                errors.push('Abstract must be at least 50 characters long');
+            }
+
+            // Validate keywords
+            if (!keywords) {
+                errors.push('Keywords are required');
+            }
+
+            // Validate file upload
+            if (!paperFile) {
+                errors.push('Please upload your research paper');
+            } else if (!paperFile.name.endsWith('.pdf')) {
+                errors.push('Only PDF files are allowed');
+            } else if (paperFile.size > 10 * 1024 * 1024) { // 10MB limit
+                errors.push('File size must be less than 10MB');
+            }
+
+            // Display errors or process form
+            if (errors.length > 0) {
+                displayError(errors.join('<br>'));
+            } else {
+                submitForm();
+            }
+        }
+
+        /**
+         * EMAIL VALIDATION
+         * ================
+         * Checks if email follows valid email format
+         * 
+         * @param {string} email - Email address to validate
+         * @returns {boolean} - True if email is valid, false otherwise
+         */
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        /**
+         * FORM SUBMISSION
+         * ===============
+         * Processes the validated form data
+         * Simulates submission and shows success message
+         * In production, this would send data to a backend server
+         */
+        function submitForm() {
+            // Safely read form values (sidebar may be removed)
+            const getVal = id => { const el = document.getElementById(id); return el ? (el.value || '') : ''; };
+            const fileEl = document.getElementById('paperFile');
+            const fileName = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0].name : '';
+
+            const formData = {
+                title: getVal('title'),
+                authorName: getVal('authorName'),
+                authorEmail: getVal('authorEmail'),
+                category: getVal('category'),
+                submissionDate: getVal('submissionDate'),
+                abstract: getVal('abstract'),
+                keywords: getVal('keywords'),
+                fileName: fileName,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Log form data (in production, send to backend)
+            console.log('Research Paper Submitted (safe):', formData);
+
+            // Save to localStorage for demonstration
+            const submissions = JSON.parse(localStorage.getItem('researchPapers') || '[]');
+            submissions.push(formData);
+            localStorage.setItem('researchPapers', JSON.stringify(submissions));
+
+            // Show success message if present
+            const successEl = document.getElementById('successMessage');
+            if (successEl) successEl.style.display = 'block';
+
+            // Reset inputs if present
+            ['title','authorName','authorEmail','category','submissionDate','abstract','keywords','paperFile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                    if (el.type === 'file') el.value = '';
+                    else el.value = '';
+                }
+            });
+
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'Student_dashboard.html';
+            }, 2000);
+        }
+
+        // Save current paper and proceed to chapters selection (no immediate redirect to dashboard)
+        function doneAndGoToChapters(){
+            const getVal = id => { const el = document.getElementById(id); return el ? (el.value || '') : ''; };
+            const fileEl = document.getElementById('paperFile');
+            const fileName = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0].name : '';
+
+            const formData = {
+                title: getVal('title'),
+                authorName: getVal('authorName'),
+                authorEmail: getVal('authorEmail'),
+                category: getVal('category'),
+                submissionDate: getVal('submissionDate'),
+                abstract: getVal('abstract'),
+                keywords: getVal('keywords'),
+                fileName: fileName,
+                submittedAt: new Date().toISOString()
+            };
+
+            const submissions = JSON.parse(localStorage.getItem('researchPapers') || '[]');
+            submissions.push(formData);
+            localStorage.setItem('researchPapers', JSON.stringify(submissions));
+
+            // store last index for flow
+            const index = submissions.length - 1;
+            localStorage.setItem('currentPaperIndex', String(index));
+
+            // Small visual feedback if available
+            const successEl = document.getElementById('successMessage');
+            if (successEl) successEl.style.display = 'block';
+
+            // navigate to chapters selector
+            setTimeout(() => {
+                window.location.href = 'chapters.html?paperIndex=' + index;
+            }, 400);
+        }
+
+        /**
+         * ERROR MESSAGE DISPLAY
+         * ====================
+         * Shows formatted error message to user
+         * 
+         * @param {string} message - Error message(s) to display
+         */
+        function displayError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = '✗ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        /**
+         * PAGE INITIALIZATION
+         * ===================
+         * Sets minimum date to today's date on page load
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date to today (only if the input exists)
+            const today = new Date().toISOString().split('T')[0];
+            const sd = document.getElementById('submissionDate');
+            if (sd) sd.min = today;
+        });
+    </script>
+</body>
+</html>
