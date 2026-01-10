@@ -711,33 +711,103 @@
             color: #999;
         }
 
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 12px;
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 22px;
-            }
-
-            .overview-grid, .analytics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .milestone {
-                grid-template-columns: 1fr;
-            }
-
-            .gantt-container {
-                overflow-x: auto;
-            }
-
-            .tabs {
-                overflow-x: auto;
-            }
+        /* SUBMISSION TRACKER (accordion) */
+        .accordion .chapter {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(20,20,60,0.06);
+            margin-bottom: 14px;
+            overflow: hidden;
+            border: 1px solid #eef2ff;
         }
+
+        .accordion .chapter-header {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .accordion .chapter-title {
+            font-weight: 700;
+            color: #222;
+            letter-spacing: 0.1px;
+        }
+
+        .accordion .chapter-header .chapter-meta {
+            color: #667eea;
+            font-weight: 700;
+            transition: transform 0.28s ease;
+        }
+
+        .accordion .chapter.open .chapter-header .chapter-meta {
+            transform: rotate(180deg);
+        }
+
+        .accordion .parts {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.28s ease;
+            background: linear-gradient(180deg,#fbfbff, #ffffff);
+            opacity: 0;
+        }
+
+        .accordion .parts.visible { opacity: 1; }
+
+        .accordion .part {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-top: 1px solid #f1f5ff;
+            transform: translateY(-6px);
+            opacity: 0;
+            transition: transform 0.36s ease, opacity 0.36s ease;
+        }
+
+        .accordion .parts.visible .part { transform: none; opacity: 1; }
+
+        .accordion .part .part-name {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .accordion .part .part-actions { display:flex; gap:10px; align-items:center; }
+
+        .accordion .part .part-actions button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 6px 14px rgba(102,126,234,0.08);
+            transition: transform 0.14s ease, background 0.18s ease;
+        }
+
+        .accordion .part .part-actions button:active { transform: translateY(1px); }
+
+        .accordion .part.submitted { background: #eef9f0; }
+
+        .accordion .part .part-actions button.submitted { background: #27ae60; }
+
+        .part-status { display:flex; gap:8px; align-items:center; margin-left:8px; }
+        .part-status .status-select { appearance:none; -webkit-appearance:none; border:1px solid #e6eefb; padding:6px 8px; border-radius:6px; font-size:12px; background:#fff; color:#333; }
+
+        .status-badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700; min-width:70px; text-align:center; }
+        .status-pending { background: #f0f0f0; color: #666; }
+        .status-submitted { background: #d4edda; color: #155724; }
+        .status-delayed { background: #f8d7da; color: #721c24; }
+        .status-revise { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d0f6e0; color: #0b5e4a; }
+
+        /* Section parts panel (overview) uses same styles */
+        #sectionPartsContainer .section-parts { margin-top: 12px; border-radius: 10px; overflow: hidden; border:1px solid #eef2ff; box-shadow:0 6px 18px rgba(20,20,60,0.04); }
+        #sectionPartsContainer .section-parts .chapter-header { padding:12px 14px; background:linear-gradient(90deg,#f7f9ff,#ffffff); }
+        #sectionPartsContainer .section-parts .parts { background: #fff; }
     </style>
 </head>
 <body>
@@ -758,6 +828,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('overview', this)">📊 Overview</button>
             <button class="tab-btn" onclick="switchTab('gantt', this)">📅 Timeline</button>
+            <button class="tab-btn" onclick="switchTab('submissions', this)">📥 Submissions</button>
             <button class="tab-btn" onclick="switchTab('history', this)">📂 History</button>
         </div>
 
@@ -789,6 +860,7 @@
             <div class="progress-section">
                 <h2>Research Sections Status</h2>
                 <div class="research-sections" id="researchSectionsContainer"></div>
+                <div id="sectionPartsContainer" style="margin-top:16px;"></div>
             </div>
 
             <div class="progress-section">
@@ -829,6 +901,16 @@
             </div>
         </div>
         <!-- HISTORY TAB -->
+        <!-- SUBMISSIONS TAB -->
+        <div id="submissions" class="tab-content">
+            <div class="progress-section">
+                <h2>Submission Tracker</h2>
+                <p style="color:#666; font-size:14px; margin-top:0;">📌 View submission status for each part of the research. Click a chapter to expand and mark parts as submitted.</p>
+
+                <div id="submissionAccordion" class="accordion" style="margin-top:16px;"></div>
+            </div>
+        </div>
+
         <div id="history" class="tab-content">
             <div class="progress-section">
                 <h2>Submission History</h2>
@@ -873,6 +955,8 @@
             renderGanttChart();
             // Load per-group submission history
             loadGroupHistory();
+            // Initialize submission tracker UI
+            initSubmissionTracker();
         });
 
         function getScoreBadgeClass(score) {
@@ -929,11 +1013,22 @@
             // Render research sections
             const researchSectionsContainer = document.getElementById('researchSectionsContainer');
             researchSectionsContainer.innerHTML = RESEARCH_SECTIONS.map((section, index) => `
-                <div class="section-box ${section.completed ? 'completed' : ''}">
+                <div class="section-box ${section.completed ? 'completed' : ''}" data-index="${index}">
                     <div class="section-title">${section.name}</div>
                     <div class="section-status">${section.completed ? '✓ Done' : 'Pending'}</div>
                 </div>
             `).join('');
+
+            // Attach click handlers to open sliding parts list for each chapter
+            setTimeout(() => {
+                const boxes = researchSectionsContainer.querySelectorAll('.section-box');
+                boxes.forEach(box => {
+                    box.onclick = () => {
+                        const idx = parseInt(box.getAttribute('data-index'));
+                        openChapterParts(idx);
+                    };
+                });
+            }, 0);
 
             // Render member scores
             const memberScoresContainer = document.getElementById('memberScoresContainer');
@@ -1221,6 +1316,269 @@
 
 
         // remove duplicate initialization - timeline sections are loaded in the main DOMContentLoaded handler
+
+        // --- Submission Tracker (group) ---
+        const SUBMISSION_CHAPTERS = [
+            { name: 'Chapter 1', parts: [
+                'Background of the Study',
+                'Statement of the Problem',
+                'Conceptual Framework',
+                'Theoretical Framework',
+                'Significance of the Study',
+                'Scope and Delimitation of the Study',
+                'Definition of Terms'
+            ]},
+            { name: 'Chapter 2', parts: [
+                'Review of Related Literature',
+                'Review of Related Studies'
+            ]},
+            { name: 'Chapter 3', parts: [
+                'Research Design',
+                'Locale of the Study',
+                'Research Instrument',
+                'Data Gathering Procedures',
+                'Method of Data Analysis'
+            ]},
+            { name: 'Chapter 4', parts: [
+                'Presentation of Key Findings'
+            ]},
+            { name: 'Chapter 5', parts: [
+                'Summary',
+                'Implication of Findings',
+                'Conclusions',
+                'Recommendations'
+            ]}
+        ];
+
+        let submissionStatus = {};
+
+        function getSubmissionKey() {
+            if (!currentGroup) return 'submissionStatus_anonymous';
+            return `submissionStatus_${currentGroup.id || currentGroup.name}`;
+        }
+
+        function loadSubmissionStatus() {
+            try {
+                submissionStatus = JSON.parse(localStorage.getItem(getSubmissionKey())) || {};
+            } catch (e) {
+                submissionStatus = {};
+            }
+        }
+
+        function saveSubmissionStatus() {
+            try {
+                localStorage.setItem(getSubmissionKey(), JSON.stringify(submissionStatus));
+            } catch (e) {
+                console.error('Failed to save submission status', e);
+            }
+        }
+
+        function initSubmissionTracker() {
+            loadSubmissionStatus();
+            renderSubmissionAccordion();
+        }
+
+        function renderSubmissionAccordion() {
+            const container = document.getElementById('submissionAccordion');
+            if (!container) return;
+            container.innerHTML = SUBMISSION_CHAPTERS.map((ch, ci) => {
+                const partsHtml = ch.parts.map((p, pi) => {
+                    const status = (submissionStatus[ch.name] && submissionStatus[ch.name][p]) || 'pending';
+                    return `
+                        <div class="part ${status === 'submitted' ? 'submitted' : ''}" data-ch="${ci}" data-part="${pi}">
+                            <div class="part-name">${p}</div>
+                            <div class="part-actions">
+                                <button class="${status === 'submitted' ? 'submitted' : ''}" onclick="togglePartSubmitted(${ci}, ${pi}, this)">${status === 'submitted' ? 'Submitted' : 'Mark Submitted'}</button>
+                                <div class="part-status">
+                                    <span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                                    <select class="status-select" onchange="setPartStatus(${ci}, ${pi}, this)">
+                                        <option value="pending"${status === 'pending' ? ' selected' : ''}>Pending</option>
+                                        <option value="submitted"${status === 'submitted' ? ' selected' : ''}>Submitted</option>
+                                        <option value="delayed"${status === 'delayed' ? ' selected' : ''}>Delayed</option>
+                                        <option value="revise"${status === 'revise' ? ' selected' : ''}>Revise</option>
+                                        <option value="completed"${status === 'completed' ? ' selected' : ''}>Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="chapter" data-index="${ci}">
+                        <div class="chapter-header">
+                            <div class="chapter-title">${ch.name}</div>
+                            <div class="chapter-meta">▾</div>
+                        </div>
+                        <div class="parts">${partsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Initialize parts containers and attach header listeners
+            const chapters = container.querySelectorAll('.chapter');
+            chapters.forEach(chEl => {
+                const header = chEl.querySelector('.chapter-header');
+                const partsEl = chEl.querySelector('.parts');
+                if (partsEl) {
+                    partsEl.style.maxHeight = '0px';
+                    partsEl.classList.remove('visible');
+                }
+                if (header) header.onclick = () => toggleChapter(header);
+            });
+        }
+
+        function toggleChapter(headerEl) {
+            const chapter = headerEl.closest('.chapter');
+            if (!chapter) return;
+            const parts = chapter.querySelector('.parts');
+            if (!parts) return;
+
+            const isOpen = chapter.classList.contains('open');
+            if (isOpen) {
+                parts.style.maxHeight = '0px';
+                parts.classList.remove('visible');
+                chapter.classList.remove('open');
+            } else {
+                // open this chapter
+                parts.style.maxHeight = parts.scrollHeight + 'px';
+                // animate visibility after layout so child transitions run
+                requestAnimationFrame(() => parts.classList.add('visible'));
+                chapter.classList.add('open');
+            }
+        }
+
+        function togglePartSubmitted(ci, pi, btn) {
+            const chapter = SUBMISSION_CHAPTERS[ci];
+            if (!chapter) return;
+            const partName = chapter.parts[pi];
+            submissionStatus[chapter.name] = submissionStatus[chapter.name] || {};
+            const current = submissionStatus[chapter.name][partName] || 'pending';
+            const newStatus = current === 'submitted' ? 'pending' : 'submitted';
+            submissionStatus[chapter.name][partName] = newStatus;
+            saveSubmissionStatus();
+
+            // Update UI
+            const partEl = btn.closest('.part');
+            if (partEl) updatePartUI(partEl, newStatus);
+
+            // Recalculate expanded container height if open
+            try {
+                const chapterEl = btn.closest('.chapter') || document.querySelector('#sectionPartsContainer .section-parts[data-index="' + ci + '"]');
+                if (chapterEl) {
+                    const partsEl = chapterEl.querySelector('.parts');
+                    if (partsEl && partsEl.style.maxHeight && partsEl.style.maxHeight !== '0px') {
+                        partsEl.style.maxHeight = partsEl.scrollHeight + 'px';
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to adjust parts height', e);
+            }
+        }
+
+        // helper: set status from select
+        function setPartStatus(ci, pi, selectEl) {
+            const chapter = SUBMISSION_CHAPTERS[ci];
+            if (!chapter) return;
+            const partName = chapter.parts[pi];
+            submissionStatus[chapter.name] = submissionStatus[chapter.name] || {};
+            submissionStatus[chapter.name][partName] = selectEl.value;
+            saveSubmissionStatus();
+            const partEl = selectEl.closest('.part');
+            if (partEl) updatePartUI(partEl, selectEl.value);
+        }
+
+        // helper: update UI for a part element given a status string
+        function updatePartUI(partEl, status) {
+            // button
+            const btn = partEl.querySelector('button');
+            if (btn) {
+                if (status === 'submitted') {
+                    btn.textContent = 'Submitted';
+                    btn.classList.add('submitted');
+                } else {
+                    btn.textContent = 'Mark Submitted';
+                    btn.classList.remove('submitted');
+                }
+            }
+
+            // part class
+            if (status === 'submitted') partEl.classList.add('submitted'); else partEl.classList.remove('submitted');
+
+            // badge
+            const badge = partEl.querySelector('.status-badge');
+            if (badge) {
+                // remove any existing status- classes
+                badge.className = 'status-badge status-' + status;
+                badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            }
+
+            // select
+            const sel = partEl.querySelector('.status-select');
+            if (sel) sel.value = status;
+        }
+
+        function openChapterParts(index) {
+            const container = document.getElementById('sectionPartsContainer');
+            if (!container) return;
+
+            const chapter = SUBMISSION_CHAPTERS[index];
+            if (!chapter) return;
+
+            // Render parts list (re-use part styling)
+            const partsHtml = chapter.parts.map((p, pi) => {
+                const status = (submissionStatus[chapter.name] && submissionStatus[chapter.name][p]) || 'pending';
+                return `
+                    <div class="part ${status === 'submitted' ? 'submitted' : ''}" data-ch="${index}" data-part="${pi}">
+                        <div class="part-name">${p}</div>
+                        <div class="part-actions">
+                            <button class="${status === 'submitted' ? 'submitted' : ''}" onclick="togglePartSubmitted(${index}, ${pi}, this)">${status === 'submitted' ? 'Submitted' : 'Mark Submitted'}</button>
+                            <div class="part-status">
+                                <span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                                <select class="status-select" onchange="setPartStatus(${index}, ${pi}, this)">
+                                    <option value="pending"${status === 'pending' ? ' selected' : ''}>Pending</option>
+                                    <option value="submitted"${status === 'submitted' ? ' selected' : ''}>Submitted</option>
+                                    <option value="delayed"${status === 'delayed' ? ' selected' : ''}>Delayed</option>
+                                    <option value="revise"${status === 'revise' ? ' selected' : ''}>Revise</option>
+                                    <option value="completed"${status === 'completed' ? ' selected' : ''}>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // If the same chapter is already open, toggle it closed
+            const existing = container.querySelector('.section-parts');
+            if (existing && existing.getAttribute('data-index') === String(index)) {
+                const partsEl = existing.querySelector('.parts');
+                partsEl.style.maxHeight = '0px';
+                partsEl.classList.remove('visible');
+                setTimeout(() => { container.innerHTML = ''; }, 380);
+                return;
+            }
+
+            // Replace content
+            container.innerHTML = `
+                <div class="section-parts" data-index="${index}">
+                    <div class="chapter-header">
+                        <div class="chapter-title">${chapter.name}</div>
+                    </div>
+                    <div class="parts">${partsHtml}</div>
+                </div>
+            `;
+
+            // initialize parts collapsed then expand with fade/slide
+            const partsEl = container.querySelector('.parts');
+            if (partsEl) {
+                partsEl.style.maxHeight = '0px';
+                partsEl.classList.remove('visible');
+                requestAnimationFrame(() => {
+                    partsEl.style.maxHeight = partsEl.scrollHeight + 'px';
+                    partsEl.classList.add('visible');
+                });
+            }
+        }
     </script>
 </body>
 </html>
